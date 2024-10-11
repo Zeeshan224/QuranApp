@@ -5,6 +5,16 @@ import com.example.newstatussaver.network.QuranApiService
 
 class QuranRepository(private val apiService: QuranApiService) {
 
+    private val bookmarks = mutableListOf<Verse>()
+
+    fun addBookmark(verse: Verse) {
+        if (!bookmarks.contains(verse)) {
+            verse.isBookmarked = true
+            bookmarks.add(verse)
+        }
+    }
+
+    fun getBookmarks(): List<Verse> = bookmarks
     suspend fun getQuranData(): List<Data> {
         return try {
             val response = apiService.getQuranData()
@@ -22,5 +32,22 @@ class QuranRepository(private val apiService: QuranApiService) {
             Log.e("QuranRepository", "Exception occurred: ${e.message}")
             emptyList() // Return null in case of an exception
         }
+    }
+
+    suspend fun getFullSurah(surah : Int) : SurahData?{
+        var surahData : SurahData? = null
+        val response = apiService.getSpecificSurah(surah)
+        if (response.isSuccessful) {
+            val responseBody = response.body()
+            Log.d("SurahRepository","Response : $responseBody")
+
+            surahData = responseBody?.data // Return the data if successful
+
+        } else {
+            Log.e("SurahRepository", "API call failed: ${response.errorBody()?.string()}")
+             // Return null if the response failed
+        }
+
+        return surahData
     }
 }

@@ -48,6 +48,8 @@ dependencies {
     implementation(libs.androidx.appcompat)
     implementation(libs.material)
     implementation(libs.androidx.recyclerview.v121)
+    implementation(libs.sdp.android)
+    implementation(libs.ssp.android)
 
     // Image loading
     implementation(libs.glide.v4120)

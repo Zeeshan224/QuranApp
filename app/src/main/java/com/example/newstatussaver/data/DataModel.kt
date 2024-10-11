@@ -18,7 +18,14 @@ data class Data(
     val numberOfVerses: Int,
     val revelation: Revelation,
     val sequence: Int,
-    val tafsir: Tafsir
+    val tafsir: Tafsir,
+    val verses: List<Ayah>
+) : Parcelable
+
+@Parcelize
+data class Ayah(
+    val number: Int,       // Verse number
+    val arabicText: String
 ) : Parcelable
 
 @Parcelize
@@ -52,49 +59,3 @@ data class Transliteration(
     val en: String,
     val id: String
 ) : Parcelable
-
-
-//
-//data class QuranAPI(
-//    val code: Int,
-//    val `data`: List<Data>,
-//    val message: String,
-//    val status: String
-//)
-//
-//data class Data(
-//    val name: Name,
-//    val number: Int,
-//    val numberOfVerses: Int,
-//    val revelation: Revelation,
-//    val sequence: Int,
-//    val tafsir: Tafsir
-//)
-//
-//data class Name(
-//    val long: String,
-//    val short: String,
-//    val translation: Translation,
-//    val transliteration: Transliteration
-//)
-//
-//data class Revelation(
-//    val arab: String,
-//    val en: String,
-//    val id: String
-//)
-//
-//data class Tafsir(
-//    val id: String
-//)
-//
-//data class Translation(
-//    val en: String,
-//    val id: String
-//)
-//
-//data class Transliteration(
-//    val en: String,
-//    val id: String
-//)
-//

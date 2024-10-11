@@ -18,11 +18,14 @@
         android:id="@+id/detailsFragment"
         android:name="com.example.newstatussaver.surahlistfragment.SurahListFragment"
         android:label="fragment_details"
-        tools:layout="@layout/fragment_details">
+        tools:layout="@layout/fragment_surah_list">
 
         <action
             android:id="@+id/action_detailsFragment_to_compSurahFragment"
             app:destination="@id/compSurahFragment" />
+        <action
+            android:id="@+id/action_detailsFragment_to_bookmarkFragment"
+            app:destination="@id/bookmarkFragment" />
     </fragment>
     <fragment
         android:id="@+id/compSurahFragment"
@@ -32,8 +35,18 @@
 
         <argument
             android:name="selectedSurah"
-            app:argType="com.example.newstatussaver.data.Data" />
+            app:argType="integer" />
 
+    </fragment>
+    <fragment
+        android:id="@+id/bookmarkFragment"
+        android:name="com.example.newstatussaver.bookmarkfragment.BookmarkFragment"
+        android:label="fragment_bookmark"
+        tools:layout="@layout/fragment_bookmark">
+
+        <action
+            android:id="@+id/action_bookmarkFragment_to_detailsFragment"
+            app:destination="@id/detailsFragment" />
     </fragment>
 
 </navigation>
