@@ -26,7 +26,7 @@ class SplashFragment : Fragment() {
 
         Handler(Looper.getMainLooper()).postDelayed({
             // Navigate to DetailsFragment after 3 seconds
-            findNavController().navigate(R.id.action_paraFragment_to_detailsFragment)
+            findNavController().navigate(R.id.action_paraFragment_to_homeFragment)
         }, 3000) // 3 seconds delay
     }
 }

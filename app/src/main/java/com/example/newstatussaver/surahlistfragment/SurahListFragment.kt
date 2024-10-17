@@ -20,6 +20,7 @@ import com.example.newstatussaver.QuranViewModel
 import com.example.newstatussaver.R
 import com.example.newstatussaver.data.Data
 import com.example.newstatussaver.databinding.FragmentSurahListBinding
+import com.example.newstatussaver.homefragment.HomeFragmentDirections
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.android.material.navigation.NavigationBarItemView
 
@@ -46,52 +47,45 @@ class SurahListFragment : Fragment() {
         passingData()
         setUpRecyclerView()
         checkNetworkConnectivity()
+        searchSurah()
     }
+
     private fun setUpRecyclerView() {
         binding.apply {
             recyclerView.layoutManager = LinearLayoutManager(requireContext())
             recyclerView.adapter = adapter
-            search.addTextChangedListener(object : TextWatcher {
-                override fun beforeTextChanged(
-                    s: CharSequence?,
-                    start: Int,
-                    count: Int,
-                    after: Int
-                ) {}
-                override fun onTextChanged(
-                    s: CharSequence?,
-                    start: Int,
-                    before: Int,
-                    count: Int
-                ) {
-                    val query = s.toString()
-                    filterSurahList(query)
-                }
-
-                override fun afterTextChanged(s: Editable?) {
-                }
-            })
-            menu.setOnItemReselectedListener { item ->
-                when (item.itemId) {
-                    R.id.list -> {
-                        true
-                    }
-
-                    R.id.bookmark -> {
-                        findNavController().navigate(R.id.bookmarkFragment)
-                        true
-                    }
-
-                    else -> false
-                }
-            }
         }
+    }
+
+    private fun searchSurah() {
+        binding.search.addTextChangedListener(object : TextWatcher {
+            override fun beforeTextChanged(
+                s: CharSequence?,
+                start: Int,
+                count: Int,
+                after: Int
+            ) {
+            }
+
+            override fun onTextChanged(
+                s: CharSequence?,
+                start: Int,
+                before: Int,
+                count: Int
+            ) {
+                val query = s.toString()
+                filterSurahList(query)
+            }
+
+            override fun afterTextChanged(s: Editable?) {
+            }
+        })
     }
 
     private fun passingData() {
         adapter = SurahListAdapter(originalSurahList) { selectedSurah ->
             val action =
-                SurahListFragmentDirections.actionDetailsFragmentToCompSurahFragment(
+                HomeFragmentDirections.actionHomeFragmentToCompSurahFragment(
                     selectedSurah
                 )
             findNavController().navigate(action)
@@ -114,7 +108,6 @@ class SurahListFragment : Fragment() {
                 recyclerView.visibility = View.GONE
                 quran.visibility = View.GONE
                 search.visibility = View.GONE
-                menu.visibility = View.GONE
             } else {
                 placeholderImage.visibility = View.GONE
                 recyclerView.visibility = View.VISIBLE
@@ -123,7 +116,6 @@ class SurahListFragment : Fragment() {
             }
         }
     }
-
     private fun backPress() {
         requireActivity().onBackPressedDispatcher.addCallback(viewLifecycleOwner) {
             val editText = binding.search
@@ -138,7 +130,6 @@ class SurahListFragment : Fragment() {
             }
         }
     }
-
     private fun filterSurahList(query: String) {
         val filteredList = if (query.isEmpty()) {
             originalSurahList
@@ -149,14 +140,12 @@ class SurahListFragment : Fragment() {
         }
         adapter.submitList(filteredList)
     }
-
     private fun isNetworkAvailable(): Boolean {
         val connectivityManager =
             requireContext().getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
         val activeNetworkInfo = connectivityManager.activeNetworkInfo
         return activeNetworkInfo != null && activeNetworkInfo.isConnected
     }
-
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null // Clear the binding reference to avoid memory leaks

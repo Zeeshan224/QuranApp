@@ -5,7 +5,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/blue">
+    android:background="@color/blue_semi_transparent">
 
     <ImageView
         android:id="@+id/quran"
@@ -43,19 +43,9 @@
         android:paddingBottom="@dimen/_12sdp"
         tools:listitem="@layout/item_surah"
         android:layout_marginBottom="16dp"
-        app:layout_constraintBottom_toTopOf="@id/menu"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/search" />
-
-    <com.google.android.material.bottomnavigation.BottomNavigationView
-        android:id="@+id/menu"
-        android:layout_width="match_parent"
-        android:layout_height="@dimen/_50sdp"
-        android:stateListAnimator="@null"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:itemTextAppearanceInactive="?attr/textAppearanceCaption"
-        app:itemIconTint="@color/bottom_nav_item_selector"
-        app:menu="@menu/bottom_navigation_menu"/>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

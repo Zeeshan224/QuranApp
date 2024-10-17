@@ -64,6 +64,7 @@ dependencies {
     // UI components
     implementation(libs.androidx.activity)
     implementation(libs.androidx.constraintlayout)
+//    implementation(libs.testng)
 
     // Testing
     testImplementation(libs.junit)

@@ -1,12 +1,10 @@
 package com.example.newstatussaver
 
-import android.content.Context
 import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.newstatussaver.data.BookmarkRepository
 import com.example.newstatussaver.data.Data
 import com.example.newstatussaver.data.QuranRepository
 import com.example.newstatussaver.data.SurahData
@@ -14,9 +12,8 @@ import com.example.newstatussaver.data.Verse
 import com.example.newstatussaver.network.RetrofitInstance
 import kotlinx.coroutines.launch
 
-class QuranViewModel() : ViewModel() {
+class QuranViewModel : ViewModel() {
 
-//    private val bookmarkRepository = BookmarkRepository()
     private val _bookmarkedVerses = MutableLiveData<List<Verse>>(emptyList())
     val bookmarkedVerses: LiveData<List<Verse>> get() = _bookmarkedVerses
     private val repository: QuranRepository by lazy {

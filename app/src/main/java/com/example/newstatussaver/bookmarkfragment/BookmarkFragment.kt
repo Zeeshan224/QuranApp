@@ -31,21 +31,6 @@ class BookmarkFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
         setUpRecyclerView()
         observeBookmarks()
-        menuNavigation()
-    }
-    private fun menuNavigation() {
-        binding.menu.setOnNavigationItemSelectedListener { item ->
-            when(item.itemId) {
-                R.id.list -> {
-                    findNavController().navigate(R.id.detailsFragment)
-                    true
-                }
-                R.id.bookmark-> {
-                    true
-                }
-                else -> false
-            }
-        }
     }
     private fun setUpRecyclerView() {
         binding.recyclerView.layoutManager = LinearLayoutManager(requireContext())
@@ -63,7 +48,7 @@ class BookmarkFragment : Fragment() {
                     recyclerView.visibility = View.VISIBLE
                     ivNoBookmark.visibility = View.GONE
                     tvNoBookmark.visibility = View.GONE
-//                    bookmarkAdapter.updateBookmarks(bookmarks)
+                    bookmarkAdapter.updateBookmarks(bookmarks)
                 } else {
                     recyclerView.visibility = View.GONE
                     ivNoBookmark.visibility = View.VISIBLE
