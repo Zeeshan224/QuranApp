@@ -46,4 +46,3 @@ class HomeFragment : Fragment() {
         _binding = null
     }
 }
-

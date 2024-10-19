@@ -1,6 +1,8 @@
 package com.example.newstatussaver.compsurahfragment
 
+import android.content.Context
 import android.content.Intent
+import android.content.SharedPreferences
 import android.media.MediaPlayer
 import android.os.Bundle
 import android.util.Log
@@ -8,14 +10,18 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
+import androidx.activity.OnBackPressedCallback
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
+import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.newstatussaver.QuranViewModel
 import com.example.newstatussaver.data.Verse
 import com.example.newstatussaver.databinding.FragmentCompSurahBinding
+import com.google.gson.Gson
+import com.google.gson.reflect.TypeToken
 import kotlin.math.log
 
 class CompSurahFragment : Fragment() {
@@ -38,32 +44,40 @@ class CompSurahFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        quranViewModel.loadBookmarks(requireContext())
         observeViewModel()
+        handleBackPress()
     }
+
     private fun observeViewModel() {
         val selectedSurah = args.selectedSurah
         quranViewModel.fetchSurah(selectedSurah)
         quranViewModel.surahData.observe(viewLifecycleOwner) { surahData ->
             surahData?.let {
-                setUpRecyclerView(it.verses)
+                val currentBookmarks = quranViewModel.bookmarkedVerses.value?: emptyList()
                 it.verses.forEach { verse ->
+                    verse.isBookmarked = currentBookmarks.any{ bookmark -> bookmark.number == verse.number}
                     Log.d("surah", "Verse: ${verse.text.arab}")
                 }
+                setUpRecyclerView(it.verses)
             }
         }
-        quranViewModel.bookmarkedVerses.observe(viewLifecycleOwner){ bookmarks->
+        quranViewModel.bookmarkedVerses.observe(viewLifecycleOwner) { bookmarks ->
             Log.d("Bookmark", "Observed bookmarked verses: $bookmarks")
         }
     }
+
     private fun setUpRecyclerView(verses: List<Verse>) {
         binding.recyclerView.layoutManager = LinearLayoutManager(requireContext())
         surahDataAdapter = SurahDataAdapter(verses,
             onPlayClickListener = { audioUri -> handlePlayClick(audioUri) },
-            onBookmarkClick = { verse-> handleBookmarkClick(verse)},
-            onShareClick = { verse-> handleShareClick(verse)}
+            onPauseClickListener = { handlePauseClick() },
+            onBookmarkClick = { verse -> handleBookmarkClick(verse) },
+            onShareClick = { verse -> handleShareClick(verse) }
         )
         binding.recyclerView.adapter = surahDataAdapter
     }
+
     private fun handleShareClick(verse: Verse) {
         val verseText = verse.text.arab // Or however you want to format the verse text
         val shareIntent = Intent().apply {
@@ -73,6 +87,7 @@ class CompSurahFragment : Fragment() {
         }
         startActivity(Intent.createChooser(shareIntent, "Share Verse"))
     }
+
     private fun handlePlayClick(audioUri: String) {
         Log.d("AudioPlay", "Play icon clicked for URI: $audioUri")
 
@@ -97,24 +112,34 @@ class CompSurahFragment : Fragment() {
                 setOnCompletionListener {
                     this@CompSurahFragment.isPlaying = false
                     Log.d("AudioPlay", "Audio playback completed.")
+                    surahDataAdapter.notifyItemChanged(surahDataAdapter.currentlyPlayingPosition)
+                    surahDataAdapter.currentlyPlayingPosition = -1
                 }
                 prepareAsync()
             }
         }
-        else {
-            Log.d("AudioPlay", "Pausing audio.")
-            mediaPlayer?.pause()
-            isPlaying = false
-        }
+    }
+
+    private fun handlePauseClick() {
+        Log.d("AudioPlay", "Pausing audio.")
+        mediaPlayer?.pause()
+        isPlaying = false
     }
 
     private fun handleBookmarkClick(verse: Verse) {
-        Toast.makeText(requireContext(), "bookmark saved", Toast.LENGTH_SHORT).show()
-        Log.d("Bookmark", "Bookmark clicked for verse: ${verse.text.arab}")
-        quranViewModel.addBookmark(verse)
-        quranViewModel.bookmarkedVerses.observe(viewLifecycleOwner){ bookmarks->
-            Log.d("Bookmark","Current bookmarked verses in ViewModel: $bookmarks")
-        }
+        quranViewModel.toggleBookmarks(verse, requireContext()) // Call ViewModel to handle bookmarks
+        Toast.makeText(requireContext(), "Bookmark saved", Toast.LENGTH_SHORT).show()
+    }
+
+    private fun handleBackPress() {
+        requireActivity().onBackPressedDispatcher.addCallback(
+            viewLifecycleOwner,
+            object : OnBackPressedCallback(true) {
+                override fun handleOnBackPressed() {
+                    // Navigate up to the previous fragment in the back stack
+                    findNavController().navigateUp()
+                }
+            })
     }
 
     override fun onDestroyView() {

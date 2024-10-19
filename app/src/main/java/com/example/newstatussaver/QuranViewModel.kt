@@ -1,5 +1,6 @@
 package com.example.newstatussaver
 
+import android.content.Context
 import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
@@ -10,24 +11,67 @@ import com.example.newstatussaver.data.QuranRepository
 import com.example.newstatussaver.data.SurahData
 import com.example.newstatussaver.data.Verse
 import com.example.newstatussaver.network.RetrofitInstance
+import com.google.gson.Gson
+import com.google.gson.reflect.TypeToken
 import kotlinx.coroutines.launch
 
 class QuranViewModel : ViewModel() {
 
     private val _bookmarkedVerses = MutableLiveData<List<Verse>>(emptyList())
     val bookmarkedVerses: LiveData<List<Verse>> get() = _bookmarkedVerses
+
     private val repository: QuranRepository by lazy {
         QuranRepository(RetrofitInstance.api)
     }
-     fun addBookmark(verse: Verse) {
-        viewModelScope.launch {
-            Log.d("QuranViewModel", "Adding bookmark for verse: ${verse.text}")  // Log the verse text
-            val updatedBookmarks = _bookmarkedVerses.value.orEmpty().toMutableList().apply {
-                add(verse)
-            }
-            _bookmarkedVerses.postValue(updatedBookmarks)
-            Log.d("QuranViewModel", "Current bookmarks count: ${updatedBookmarks.size}")
+
+    fun loadBookmarks(context: Context) {
+        _bookmarkedVerses.value = getBookmarks(context)
+    }
+
+    private fun getBookmarks(context: Context): List<Verse> {
+        val sharedPreferences = context.getSharedPreferences("BookmarkPrefs", Context.MODE_PRIVATE)
+        val jsonBookmarks = sharedPreferences.getString("bookmarkedVerses", null)
+
+        return if (jsonBookmarks != null) {
+            val gson = Gson()
+            val type = object : TypeToken<List<Verse>>() {}.type
+            gson.fromJson(jsonBookmarks, type)
+        } else {
+            emptyList()
         }
+    }
+
+    fun toggleBookmarks(verse: Verse, context: Context){
+        val currentBookmarks = getBookmarks(context).toMutableList()
+
+        if (currentBookmarks.contains(verse)){
+            currentBookmarks.remove(verse)
+        }
+        else{
+            currentBookmarks.add(verse)
+        }
+        saveBookmarks(context, currentBookmarks)
+        _bookmarkedVerses.value = currentBookmarks
+    }
+
+    fun addBookmark(verse: Verse, context: Context) {
+        val currentBookmarks = getBookmarks(context).toMutableList()
+
+        // Check if the verse is already bookmarked
+        if (!currentBookmarks.contains(verse)) {
+            currentBookmarks.add(verse)
+            saveBookmarks(context, currentBookmarks)
+            _bookmarkedVerses.value = currentBookmarks // Update the LiveData
+        }
+    }
+
+    private fun saveBookmarks(context: Context, bookmarks: List<Verse>) {
+        val sharedPreferences = context.getSharedPreferences("BookmarkPrefs", Context.MODE_PRIVATE)
+        val editor = sharedPreferences.edit()
+        val gson = Gson()
+        val jsonBookmarks = gson.toJson(bookmarks)
+        editor.putString("bookmarkedVerses", jsonBookmarks)
+        editor.apply()
     }
 
     private val _surahList = MutableLiveData<List<Data>>()

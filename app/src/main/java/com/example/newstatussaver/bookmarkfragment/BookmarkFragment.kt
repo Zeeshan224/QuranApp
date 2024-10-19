@@ -15,6 +15,7 @@ import com.example.newstatussaver.R
 import com.example.newstatussaver.data.Verse
 import com.example.newstatussaver.databinding.FragmentBookmarkBinding
 import com.example.newstatussaver.databinding.FragmentSurahListBinding
+
 class BookmarkFragment : Fragment() {
     private var _binding: FragmentBookmarkBinding? = null
     private val binding get() = _binding!!
@@ -24,20 +25,28 @@ class BookmarkFragment : Fragment() {
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        _binding = FragmentBookmarkBinding.inflate(inflater,container,false)
+        _binding = FragmentBookmarkBinding.inflate(inflater, container, false)
         return binding.root
     }
+
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         setUpRecyclerView()
+        loadBookmarks()
         observeBookmarks()
     }
+
     private fun setUpRecyclerView() {
         binding.recyclerView.layoutManager = LinearLayoutManager(requireContext())
         bookmarkAdapter =
             BookmarkAdapter(listOf()) // Initialize with an empty list
         binding.recyclerView.adapter = bookmarkAdapter
     }
+
+    private fun loadBookmarks() {
+        quranViewModel.loadBookmarks(requireContext())
+    }
+
     private fun observeBookmarks() {
         Log.d("BookmarkFragment", "observeBookmarks called")
         quranViewModel.bookmarkedVerses.observe(viewLifecycleOwner) { bookmarks ->
@@ -59,6 +68,7 @@ class BookmarkFragment : Fragment() {
             }
         }
     }
+
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null // Clear the binding reference to avoid memory leaks

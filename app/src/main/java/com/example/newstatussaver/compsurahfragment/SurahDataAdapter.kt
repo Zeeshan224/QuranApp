@@ -12,17 +12,22 @@ import androidx.recyclerview.widget.RecyclerView
 import com.example.newstatussaver.R
 import com.example.newstatussaver.data.Verse
 import com.example.newstatussaver.databinding.SurahViewBinding
+
 class SurahDataAdapter(
     private val surahInfo: List<Verse>,
     private val onPlayClickListener: (String) -> Unit,
+    private val onPauseClickListener: () -> Unit,
     private val onBookmarkClick: (Verse) -> Unit,
     private val onShareClick: (Verse) -> Unit
-) :
-    RecyclerView.Adapter<SurahDataAdapter.SurahDataViewHolder>() {
+) : RecyclerView.Adapter<SurahDataAdapter.SurahDataViewHolder>() {
+
+    var currentlyPlayingPosition: Int = -1
+
     inner class SurahDataViewHolder(val binding: SurahViewBinding) :
         RecyclerView.ViewHolder(binding.root) {
         var isPlaying: Boolean = false
     }
+
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): SurahDataViewHolder {
         return SurahDataViewHolder(
             SurahViewBinding.inflate(
@@ -32,26 +37,27 @@ class SurahDataAdapter(
             )
         )
     }
+
     override fun getItemCount(): Int = surahInfo.size
     override fun onBindViewHolder(holder: SurahDataViewHolder, position: Int) {
         val verse = surahInfo[position]
-        val arabicTextSpannable = SpannableString(verse.text.arab)
-        Log.d("color", "onBindViewHolder: $arabicTextSpannable")
 
-// Apply color to the entire text
-        arabicTextSpannable.setSpan(
-            ForegroundColorSpan(Color.WHITE), 0, arabicTextSpannable.length, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE
-        )
         holder.binding.apply {
             arabicText.text = verse.text.arab
             englishText.text = verse.translation.en
             verseNumberTextView.text = verse.number.inSurah.toString()
-            if (holder.isPlaying) {
-                icPlay.setImageResource(R.drawable.bookmark)
-            }
-            else{
+            if (currentlyPlayingPosition == position) {
+                icPlay.setImageResource(R.drawable.pause)
+            } else {
                 icPlay.setImageResource(R.drawable.play)
             }
+
+            if (verse.isBookmarked) {
+                bookmark.setImageResource(R.drawable.baseline_bookmark_24)  // Filled bookmark icon
+            } else {
+                bookmark.setImageResource(R.drawable.group)  // Outlined bookmark icon
+            }
+
             if (position == 0) {
                 cover.visibility = View.VISIBLE
             } else {
@@ -60,15 +66,34 @@ class SurahDataAdapter(
 
             icPlay.setOnClickListener {
                 holder.isPlaying = !holder.isPlaying
-                if (holder.isPlaying){
-                    icPlay.setImageResource(R.drawable.bookmark)
-                    onPlayClickListener(verse.audio.primary)
-                }
-                else{
+                if (currentlyPlayingPosition == position) {
+                    // Pause the current audio
                     icPlay.setImageResource(R.drawable.play)
+                    onPauseClickListener()
+                    currentlyPlayingPosition = -1
+                } else {
+                    // Play new audio
+                    val previousPosition = currentlyPlayingPosition
+                    currentlyPlayingPosition = position
+                    icPlay.setImageResource(R.drawable.pause)
+
+                    onPlayClickListener(verse.audio.primary)
+
+                    // Reset the icon of the previously playing item
+                    if (previousPosition != -1) {
+                        notifyItemChanged(previousPosition)
+                    }
                 }
             }
             bookmark.setOnClickListener {
+                verse.isBookmarked = !verse.isBookmarked
+
+                // Update the bookmark icon based on the new state
+                if (verse.isBookmarked) {
+                    bookmark.setImageResource(R.drawable.baseline_bookmark_24)  // Filled icon
+                } else {
+                    bookmark.setImageResource(R.drawable.group)  // Outline icon
+                }
                 onBookmarkClick(verse)
             }
             share.setOnClickListener {

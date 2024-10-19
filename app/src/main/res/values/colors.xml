@@ -5,5 +5,7 @@
     <color name="green">#3EB489</color>
     <color name="sky_blue">#65D6FC</color>
     <color name="blue">#112095</color>
+    <color name="blue_semi">#8029297A</color>
+    <color name="blue_semi_transparent">#800000FF</color>
 
 </resources>
